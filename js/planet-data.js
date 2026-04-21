@@ -24,7 +24,7 @@ const planetData = [
     name: "Venus",
     image: "bilder/venus.png",
     order: 2,
-    sizeRank: 6,
+    sizeRank: 3,
     moons: 0,
     facts: [
       "Die Venus ist der heißeste Planet im Sonnensystem.",
@@ -44,7 +44,7 @@ const planetData = [
     name: "Erde",
     image: "bilder/erde.png",
     order: 3,
-    sizeRank: 5,
+    sizeRank: 4,
     moons: 1,
     facts: [
       "Die Erde ist unser Heimatplanet.",
@@ -124,7 +124,7 @@ const planetData = [
     name: "Uranus",
     image: "bilder/uranus.png",
     order: 7,
-    sizeRank: 4,
+    sizeRank: 6,
     moons: 28,
     facts: [
       "Uranus ist ein Eisriese.",
@@ -144,7 +144,7 @@ const planetData = [
     name: "Neptun",
     image: "bilder/neptun.png",
     order: 8,
-    sizeRank: 3,
+    sizeRank: 5,
     moons: 16,
     facts: [
       "Neptun ist der äußerste Planet unseres Sonnensystems.",
@@ -173,14 +173,14 @@ const slotPositionsOrder = [
 ];
 
 const slotPositionsSize = [
-  { left: "12%", top: "160px" },
-  { left: "22%", top: "160px" },
-  { left: "32%", top: "160px" },
-  { left: "44%", top: "160px" },
-  { left: "56%", top: "160px" },
-  { left: "68%", top: "160px" },
-  { left: "80%", top: "160px" },
-  { left: "92%", top: "160px" }
+  { left: "-9.5%", top: "-190px" },
+  { left: "-6%", top: "-120px" },
+  { left: "-1%", top: "-20px" },
+  { left: "6.5%", top: "90px" },
+  { left: "17%", top: "200px" },
+  { left: "31%", top: "300px" },
+  { left: "52.5%", top: "340px" },
+  { left: "81%", top: "365px" }
 ];
 
 const memoryPhrases = [

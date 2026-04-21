@@ -14,18 +14,42 @@
         <button id="resetBtn" class="control-btn">Neustart</button>
       </div>
 
-      <div id="quizQuestionWrap" class="quiz-question-box panel">
-        <div class="quiz-question-label">Welcher Planet ist gemeint?</div>
-        <div id="quizQuestionText" class="quiz-question-text"></div>
-      </div>
+    <div id="quizLevelSelect" class="quiz-level-select panel">
+  <h2 class="quiz-level-title">Wähle ein Quiz-Level</h2>
+  <p class="quiz-level-subtitle">Entscheide, wie du die Planeten und ihre Fakten entdecken möchtest.</p>
 
-      <div class="game-layout quiz-layout-only">
-        <div></div>
-        <div class="selection-panel">
-          <div id="selectionTitle" class="selection-title"></div>
-          <div id="planetList" class="planet-list"></div>
-        </div>
-      </div>
+  <div class="quiz-level-grid">
+    <button id="quizLevel1Btn" class="quiz-level-card" type="button">
+      <div class="quiz-level-card-title">Level 1</div>
+      <div class="quiz-level-card-text">Lies einen Hinweis und wähle den passenden Planeten aus.</div>
+    </button>
+
+    <button id="quizLevel2Btn" class="quiz-level-card" type="button">
+      <div class="quiz-level-card-title">Level 2</div>
+      <div class="quiz-level-card-text">Sieh dir einen Planeten an und finde den passenden Fakt dazu.</div>
+    </button>
+  </div>
+</div>
+
+<div id="quizGameArea" style="display:none;">
+  <div id="quizQuestionWrap" class="quiz-question-box panel">
+    <div id="quizQuestionLabel" class="quiz-question-label">Welcher Planet ist gemeint?</div>
+    <div id="quizQuestionText" class="quiz-question-text"></div>
+  </div>
+
+  <div id="quizPlanetPrompt" class="quiz-planet-prompt panel" style="display:none;">
+    <div class="quiz-planet-prompt-inner">
+      <img id="quizPlanetPromptImage" class="quiz-planet-prompt-image" src="" alt="" />
+      <div id="quizPlanetPromptName" class="quiz-planet-prompt-name"></div>
+    </div>
+  </div>
+
+  <div id="quizFeedback" class="quiz-feedback"></div>
+
+  <div class="quiz-answer-wrap">
+    <div id="quizAnswerGrid" class="quiz-answer-grid"></div>
+  </div>
+</div>
 
       <div class="info-panel-wrap">
         <div class="info-panel panel">

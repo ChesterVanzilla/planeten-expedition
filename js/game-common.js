@@ -4,6 +4,10 @@ function initGame(mode) {
   const selectionTitle = document.getElementById("selectionTitle");
   const infoTitle = document.getElementById("infoTitle");
   const infoText = document.getElementById("infoText");
+  const infoPanelWrap = document.querySelector(".info-panel-wrap");
+  const quizLevelSelect = document.getElementById("quizLevelSelect");
+  const quizGameArea = document.getElementById("quizGameArea");
+  const quizFeedback = document.getElementById("quizFeedback");
   const endOverlay = document.getElementById("endOverlay");
   const endText = document.getElementById("endText");
   const memoryBox = document.getElementById("memoryBox");
@@ -12,13 +16,21 @@ function initGame(mode) {
   const sunWrap = document.getElementById("sunWrap");
   const quizQuestionWrap = document.getElementById("quizQuestionWrap");
   const quizQuestionText = document.getElementById("quizQuestionText");
+  const quizQuestionLabel = document.getElementById("quizQuestionLabel");
+  const quizPlanetPrompt = document.getElementById("quizPlanetPrompt");
+  const quizPlanetPromptImage = document.getElementById("quizPlanetPromptImage");
+  const quizPlanetPromptName = document.getElementById("quizPlanetPromptName");
+  const quizAnswerGrid = document.getElementById("quizAnswerGrid");
+  const quizLevel1Btn = document.getElementById("quizLevel1Btn");
+  const quizLevel2Btn = document.getElementById("quizLevel2Btn");
   const resetBtn = document.getElementById("resetBtn");
   const restartBtn = document.getElementById("restartBtn");
 
-  let currentIndex = 0;
+    let currentIndex = 0;
   let shuffledPlanets = [];
   let activeSequence = [];
   let currentQuizQuestions = [];
+  let currentQuizLevel = null;
 
   function shuffleArray(array) {
     const cloned = [...array];
@@ -46,17 +58,98 @@ function initGame(mode) {
   }
 
   function getSequenceForMode() {
-    if (mode === "order") return [...planetData].sort((a, b) => a.order - b.order);
-    if (mode === "size") return [...planetData].sort((a, b) => a.sizeRank - b.sizeRank);
+    if (mode === "order") {
+      return [...planetData].sort((a, b) => a.order - b.order);
+    }
+
+    if (mode === "size") {
+      return [...planetData].sort((a, b) => a.sizeRank - b.sizeRank);
+    }
+
     return [...planetData];
   }
 
-  function buildQuizQuestions() {
+  function getRandomWrongPlanets(correctId, count = 3) {
     return shuffleArray(
-      planetData.map(planet => ({
-        planetId: planet.id,
-        question: getRandomItem(planet.quizClues)
-      }))
+      planetData.filter(planet => planet.id !== correctId)
+    ).slice(0, count);
+  }
+
+  function getRandomWrongFacts(correctPlanetId, correctFact, count = 3) {
+    const allFacts = planetData
+      .filter(planet => planet.id !== correctPlanetId)
+      .flatMap(planet =>
+        planet.facts.map(fact => ({
+          planetId: planet.id,
+          text: fact
+        }))
+      );
+
+    return shuffleArray(
+      allFacts.filter(fact => fact.text !== correctFact)
+    ).slice(0, count);
+  }
+
+  function buildQuizQuestions() {
+    if (currentQuizLevel === 1) {
+      return shuffleArray(
+        planetData.map(planet => {
+          const correctQuestion = getRandomItem(planet.quizClues);
+          const wrongPlanets = getRandomWrongPlanets(planet.id, 3);
+
+          const answers = shuffleArray([
+            {
+              type: "planet",
+              planetId: planet.id,
+              name: planet.name,
+              image: planet.image,
+              correct: true
+            },
+            ...wrongPlanets.map(wrongPlanet => ({
+              type: "planet",
+              planetId: wrongPlanet.id,
+              name: wrongPlanet.name,
+              image: wrongPlanet.image,
+              correct: false
+            }))
+          ]);
+
+          return {
+            level: 1,
+            planetId: planet.id,
+            question: correctQuestion,
+            answers
+          };
+        })
+      );
+    }
+
+    return shuffleArray(
+      planetData.map(planet => {
+        const correctFact = getRandomItem(planet.facts);
+        const wrongFacts = getRandomWrongFacts(planet.id, correctFact, 3);
+
+        const answers = shuffleArray([
+          {
+            type: "fact",
+            text: correctFact,
+            correct: true
+          },
+          ...wrongFacts.map(fact => ({
+            type: "fact",
+            text: fact.text,
+            correct: false
+          }))
+        ]);
+
+        return {
+          level: 2,
+          planetId: planet.id,
+          planetName: planet.name,
+          planetImage: planet.image,
+          answers
+        };
+      })
     );
   }
 
@@ -64,18 +157,35 @@ function initGame(mode) {
     return mode === "size" ? slotPositionsSize : slotPositionsOrder;
   }
 
-  function getPlanetScaleForMode(planet) {
+  function getPlanetScaleForSlot(planet) {
     if (mode !== "size") return 1;
 
     const scaleMap = {
-      merkur: 0.52,
-      mars: 0.62,
+      merkur: 1,
+      mars: 1,
+      venus: 1,
+      erde: 1,
+      neptun: 1,
+      uranus: 1,
+      saturn: 1,
+      jupiter: 1
+    };
+
+    return scaleMap[planet.id] || 1;
+  }
+
+  function getPlanetScaleForSelection(planet) {
+    if (mode !== "size") return 1;
+
+    const scaleMap = {
+      merkur: 0.4,
+      mars: 0.5,
+      venus: 0.6,
+      erde: 0.7,
       neptun: 0.8,
-      uranus: 0.9,
-      erde: 0.98,
-      venus: 1.02,
-      saturn: 1.22,
-      jupiter: 1.36
+      uranus: 1.1,
+      saturn: 1.2,
+      jupiter: 1.3
     };
 
     return scaleMap[planet.id] || 1;
@@ -83,31 +193,150 @@ function initGame(mode) {
 
   function updateModeUI() {
     const config = modeConfig[mode];
-    selectionTitle.textContent = config.selectionTitle;
-    infoTitle.textContent = config.introTitle;
-    infoText.textContent = config.introText;
-    endText.textContent = config.endText;
+
+    if (selectionTitle) {
+      selectionTitle.textContent = config.selectionTitle;
+    }
+
+    if (infoTitle) {
+      infoTitle.textContent = config.introTitle;
+    }
+
+    if (infoText) {
+      infoText.textContent = config.introText;
+    }
+
+    if (endText) {
+      endText.textContent = config.endText;
+    }
 
     if (memoryBox) {
       memoryBox.style.display = config.showMemory ? "block" : "none";
     }
+
     if (orbitRings) {
       orbitRings.style.display = config.showOrbits ? "block" : "none";
     }
+
     if (sunWrap) {
       sunWrap.style.display = config.showSun ? "block" : "none";
     }
+
     if (quizQuestionWrap) {
       quizQuestionWrap.style.display = mode === "quiz" ? "block" : "none";
     }
 
-    if (mode === "quiz" && quizQuestionText && currentQuizQuestions[currentIndex]) {
-      quizQuestionText.textContent = currentQuizQuestions[currentIndex].question;
+    if (quizPlanetPrompt) {
+      quizPlanetPrompt.style.display = "none";
     }
+  }
+
+function updateQuizLayout() {
+  if (mode !== "quiz") {
+    if (infoPanelWrap) {
+      infoPanelWrap.style.display = "";
+    }
+    return;
+  }
+
+  if (infoPanelWrap) {
+    infoPanelWrap.style.display = "none";
+  }
+
+  if (quizLevelSelect) {
+    quizLevelSelect.style.display = currentQuizLevel ? "block" : "block";
+  }
+
+  if (quizGameArea) {
+    quizGameArea.style.display = currentQuizLevel ? "block" : "none";
+  }
+
+  if (quizLevelSelect && currentQuizLevel) {
+    quizLevelSelect.style.display = "none";
+  }
+}
+
+  function renderQuizQuestion() {
+    if (mode !== "quiz" || !quizAnswerGrid) return;
+
+    const currentQuestion = currentQuizQuestions[currentIndex];
+    if (!currentQuestion) return;
+
+    quizAnswerGrid.innerHTML = "";
+
+    quizLevel1Btn?.classList.toggle("active-level-btn", currentQuizLevel === 1);
+    quizLevel2Btn?.classList.toggle("active-level-btn", currentQuizLevel === 2);
+
+    if (currentQuizLevel === 1) {
+      if (quizQuestionLabel) {
+        quizQuestionLabel.textContent = "Welcher Planet ist gemeint?";
+      }
+
+      if (quizQuestionText) {
+        quizQuestionText.textContent = currentQuestion.question;
+      }
+
+      if (quizQuestionWrap) {
+        quizQuestionWrap.style.display = "block";
+      }
+
+      if (quizPlanetPrompt) {
+        quizPlanetPrompt.style.display = "none";
+      }
+
+      currentQuestion.answers.forEach(answer => {
+        const card = document.createElement("button");
+        card.className = "quiz-answer-card";
+        card.type = "button";
+
+        card.innerHTML = `
+          <div class="quiz-planet-answer">
+            <img class="quiz-planet-answer-image" src="${answer.image}" alt="${answer.name}">
+            <div class="quiz-planet-answer-name">${answer.name}</div>
+          </div>
+        `;
+
+        card.addEventListener("click", () => handleQuizAnswer(answer, card));
+        quizAnswerGrid.appendChild(card);
+      });
+
+      return;
+    }
+
+    if (quizQuestionWrap) {
+      quizQuestionWrap.style.display = "none";
+    }
+
+    if (quizPlanetPrompt) {
+      quizPlanetPrompt.style.display = "flex";
+    }
+
+    if (quizPlanetPromptImage) {
+      quizPlanetPromptImage.src = currentQuestion.planetImage;
+      quizPlanetPromptImage.alt = currentQuestion.planetName;
+    }
+
+    if (quizPlanetPromptName) {
+      quizPlanetPromptName.textContent = currentQuestion.planetName;
+    }
+
+    currentQuestion.answers.forEach(answer => {
+      const card = document.createElement("button");
+      card.className = "quiz-answer-card";
+      card.type = "button";
+
+      card.innerHTML = `
+        <div class="quiz-fact-answer-text">${answer.text}</div>
+      `;
+
+      card.addEventListener("click", () => handleQuizAnswer(answer, card));
+      quizAnswerGrid.appendChild(card);
+    });
   }
 
   function createSlots() {
     if (!slotsContainer) return;
+
     slotsContainer.innerHTML = "";
 
     if (mode === "quiz") return;
@@ -122,15 +351,40 @@ function initGame(mode) {
       slot.style.top = slotPositions[index].top;
       slot.style.transform = "translate(-50%, -50%)";
 
-      if (index === currentIndex) slot.classList.add("active-slot");
-      if (index < currentIndex) slot.classList.add("correct-slot");
+      if (mode === "size") {
+        const slotSizeMap = {
+          merkur: 70,
+          mars: 85,
+          venus: 140,
+          erde: 150,
+          neptun: 200,
+          uranus: 210,
+          saturn: 370,
+          jupiter: 400
+        };
+
+        const slotSize = slotSizeMap[planet.id] || 150;
+        slot.style.width = `${slotSize}px`;
+        slot.style.height = `${slotSize}px`;
+      }
+
+      if (index === currentIndex) {
+        slot.classList.add("active-slot");
+      }
+
+      if (index < currentIndex) {
+        slot.classList.add("correct-slot");
+      }
 
       if (index < currentIndex) {
         const img = document.createElement("img");
         img.className = "slot-planet-image";
-        if (index === currentIndex - 1) img.classList.add("pop-in");
 
-        const scale = getPlanetScaleForMode(planet);
+        if (index === currentIndex - 1) {
+          img.classList.add(mode === "size" ? "pop-in-size" : "pop-in");
+        }
+
+        const scale = getPlanetScaleForSlot(planet);
         img.style.transform = `scale(${scale})`;
         img.src = planet.image;
         img.alt = planet.name;
@@ -142,11 +396,12 @@ function initGame(mode) {
           fallback.style.filter = "none";
           slot.appendChild(fallback);
         };
+
         slot.appendChild(img);
       } else {
         const placeholder = document.createElement("div");
         placeholder.className = "slot-placeholder";
-        placeholder.style.transform = `scale(${getPlanetScaleForMode(planet)})`;
+        placeholder.style.transform = `scale(${getPlanetScaleForSlot(planet)})`;
         slot.appendChild(placeholder);
       }
 
@@ -155,6 +410,8 @@ function initGame(mode) {
   }
 
   function createPlanetCards() {
+    if (!planetList) return;
+
     planetList.innerHTML = "";
 
     shuffledPlanets.forEach((planet) => {
@@ -162,7 +419,9 @@ function initGame(mode) {
       card.className = "planet-card";
       card.dataset.id = planet.id;
 
-      if (planet.used) card.classList.add("disabled");
+      if (planet.used) {
+        card.classList.add("disabled");
+      }
 
       const button = document.createElement("div");
       button.className = "planet-button";
@@ -176,7 +435,7 @@ function initGame(mode) {
       };
 
       if (mode === "size") {
-        img.style.transform = `scale(${getPlanetScaleForMode(planet)})`;
+        img.style.transform = `scale(${getPlanetScaleForSelection(planet)})`;
       }
 
       const name = document.createElement("div");
@@ -196,12 +455,18 @@ function initGame(mode) {
   }
 
   function updateInfo(title, text) {
-    infoTitle.textContent = title;
-    infoText.textContent = text;
+    if (infoTitle) {
+      infoTitle.textContent = title;
+    }
+
+    if (infoText) {
+      infoText.textContent = text;
+    }
   }
 
   function updateActiveOrbit() {
     if (!orbitRings) return;
+
     const rings = document.querySelectorAll(".orbit-ring");
     rings.forEach((ring, index) => {
       ring.classList.toggle("active-ring", mode === "order" && index === currentIndex);
@@ -212,35 +477,51 @@ function initGame(mode) {
     if (modeConfig[mode].showMemory && memoryPhrase) {
       memoryPhrase.innerHTML = formatMemoryPhrase(getRandomItem(memoryPhrases));
     }
+
     setTimeout(() => {
-      endOverlay.classList.add("active");
+      if (endOverlay) {
+        endOverlay.classList.add("active");
+      }
     }, 500);
   }
 
+  function handleQuizAnswer(answer, cardElement) {
+  if (!answer) return;
+
+  if (answer.correct) {
+    if (quizFeedback) {
+      quizFeedback.textContent = "Richtig!";
+    }
+
+    currentIndex++;
+
+    if (currentIndex < currentQuizQuestions.length) {
+      setTimeout(() => {
+        if (quizFeedback) {
+          quizFeedback.textContent = "";
+        }
+        renderQuizQuestion();
+      }, 450);
+    } else {
+      setTimeout(() => {
+        if (quizFeedback) {
+          quizFeedback.textContent = "";
+        }
+        completeMode();
+      }, 450);
+    }
+  } else {
+    cardElement.classList.add("wrong");
+    setTimeout(() => cardElement.classList.remove("wrong"), 400);
+
+    if (quizFeedback) {
+      quizFeedback.textContent = "Fast! Versuch es nochmal.";
+    }
+  }
+}
+
   function handlePlanetClick(clickedPlanet, cardElement) {
     if (mode === "quiz") {
-      const expectedQuestion = currentQuizQuestions[currentIndex];
-      if (!expectedQuestion) return;
-
-      if (clickedPlanet.id === expectedQuestion.planetId) {
-        clickedPlanet.used = true;
-        const praise = getRandomItem(positiveMessages);
-        const fact = getRandomItem(planetData.find(p => p.id === clickedPlanet.id).facts);
-        currentIndex++;
-
-        updateInfo(praise, fact);
-        createPlanetCards();
-
-        if (currentIndex < currentQuizQuestions.length) {
-          quizQuestionText.textContent = currentQuizQuestions[currentIndex].question;
-        } else {
-          completeMode();
-        }
-      } else {
-        cardElement.classList.add("wrong");
-        setTimeout(() => cardElement.classList.remove("wrong"), 400);
-        updateInfo("Fast!", getRandomItem(wrongMessages));
-      }
       return;
     }
 
@@ -270,20 +551,56 @@ function initGame(mode) {
   }
 
   function start() {
-    currentIndex = 0;
-    activeSequence = getSequenceForMode();
-    currentQuizQuestions = mode === "quiz" ? buildQuizQuestions() : [];
-    shuffledPlanets = shuffleArray(planetData.map(planet => ({ ...planet, used: false })));
+  currentIndex = 0;
+  activeSequence = getSequenceForMode();
+  shuffledPlanets = shuffleArray(
+    planetData.map(planet => ({ ...planet, used: false }))
+  );
 
+  if (endOverlay) {
     endOverlay.classList.remove("active");
-    updateModeUI();
-    createSlots();
-    createPlanetCards();
-    updateActiveOrbit();
   }
+
+  if (quizFeedback) {
+    quizFeedback.textContent = "";
+  }
+
+  updateModeUI();
+  createSlots();
+
+  if (mode === "quiz") {
+    if (planetList) {
+      planetList.innerHTML = "";
+    }
+
+    if (!currentQuizLevel) {
+      currentQuizQuestions = [];
+      updateQuizLayout();
+      return;
+    }
+
+    currentQuizQuestions = buildQuizQuestions();
+    updateQuizLayout();
+    renderQuizQuestion();
+  } else {
+    createPlanetCards();
+  }
+
+  updateActiveOrbit();
+}
 
   resetBtn?.addEventListener("click", start);
   restartBtn?.addEventListener("click", start);
+
+  quizLevel1Btn?.addEventListener("click", () => {
+  currentQuizLevel = 1;
+  start();
+});
+
+quizLevel2Btn?.addEventListener("click", () => {
+  currentQuizLevel = 2;
+  start();
+});
 
   document.addEventListener("gesturestart", e => e.preventDefault());
   document.addEventListener("dblclick", e => e.preventDefault(), { passive: false });
