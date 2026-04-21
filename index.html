@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Planeten Expedition</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <section class="screen active title-screen">
+      <div class="title-box">
+        <div class="title-logo-wrap">
+          <img
+            src="bilder/logo.png"
+            alt="Spiel-Logo"
+            class="title-logo"
+            onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='flex';"
+          />
+          <div id="logoFallback" class="logo-placeholder" style="display:none;"></div>
+        </div>
+
+        <div class="title-text-box panel">
+          <p class="title-text">
+            Bringe die Planeten in die richtige Reihenfolge und entdecke spannende Fakten über unser Sonnensystem.
+          </p>
+        </div>
+
+        <button id="toModeBtn" class="main-btn title-start-btn">Los geht's</button>
+      </div>
+    </section>
+
+    <section id="modeScreen" class="screen mode-screen" style="display:none;">
+      <div class="mode-box">
+        <h2 class="mode-title">Wähle einen Spielmodus</h2>
+        <p class="mode-subtitle">Lerne unser Sonnensystem auf verschiedene Arten kennen.</p>
+
+        <div class="mode-grid">
+          <button class="mode-card" onclick="location.href='modus-order.html'">
+            <div class="mode-card-title">Unser Sonnensystem</div>
+            <p class="mode-card-text">Bringe die Planeten in die richtige Reihenfolge von der Sonne nach außen.</p>
+          </button>
+
+          <button class="mode-card" onclick="location.href='modus-size.html'">
+            <div class="mode-card-title">Von großen und kleinen Planeten</div>
+            <p class="mode-card-text">Sortiere die Planeten nach ihrer Größe – vom kleinsten bis zum größten.</p>
+          </button>
+
+          <button class="mode-card" onclick="location.href='modus-quiz.html'">
+            <div class="mode-card-title">Quiz</div>
+            <p class="mode-card-text">Lies einen Hinweis und ordne den passenden Planeten zu.</p>
+          </button>
+
+          <button class="mode-card disabled" type="button">
+            <div class="mode-card-title">Modus 4</div>
+            <p class="mode-card-text">Demnächst verfügbar.</p>
+          </button>
+        </div>
+
+        <button id="backToTitleBtn" class="main-btn">Zurück</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const startScreen = document.querySelector(".title-screen");
+    const modeScreen = document.getElementById("modeScreen");
+    const toModeBtn = document.getElementById("toModeBtn");
+    const backToTitleBtn = document.getElementById("backToTitleBtn");
+
+    toModeBtn.addEventListener("click", () => {
+      startScreen.style.display = "none";
+      modeScreen.style.display = "flex";
+    });
+
+    backToTitleBtn.addEventListener("click", () => {
+      modeScreen.style.display = "none";
+      startScreen.style.display = "flex";
+    });
+
+    document.addEventListener("gesturestart", e => e.preventDefault());
+    document.addEventListener("dblclick", e => e.preventDefault(), { passive: false });
+  </script>
+</body>
+</html>

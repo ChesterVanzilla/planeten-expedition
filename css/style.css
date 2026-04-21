@@ -1,0 +1,805 @@
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  color: white;
+  background:
+    linear-gradient(rgba(6, 10, 28, 0.35), rgba(6, 10, 28, 0.35)),
+    url("../bilder/hintergrund.png") center center / cover no-repeat fixed;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+}
+
+.app {
+  width: 100%;
+  height: 100%;
+  max-width: 1880px;
+  max-height: 1040px;
+  position: relative;
+}
+
+.screen {
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+
+.screen.active {
+  display: flex;
+  flex-direction: column;
+}
+
+.panel {
+  position: relative;
+  isolation: isolate;
+  background: rgba(11, 18, 42, 0.72);
+  border-radius: 28px;
+  box-shadow:
+    0 0 18px rgba(80, 160, 255, 0.16),
+    inset 0 0 18px rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 5px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 40, 180, 0.82),
+    rgba(180, 70, 255, 0.76),
+    rgba(90, 220, 255, 0.72),
+    rgba(120, 40, 255, 0.84)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* START / MODUS */
+
+.title-screen,
+.mode-screen {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 28px;
+  padding: 40px;
+}
+
+.title-box,
+.mode-box {
+  width: min(1100px, 94%);
+  padding: 42px 34px 34px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.title-logo-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 260px;
+}
+
+.title-logo {
+  max-width: min(760px, 90%);
+  max-height: 900px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 0 18px rgba(120, 180, 255, 0.22));
+}
+
+.logo-placeholder {
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.35), transparent 35%),
+    radial-gradient(circle, rgba(255, 198, 71, 0.95), rgba(255, 130, 30, 0.8) 58%, rgba(255, 95, 20, 0.55) 78%, rgba(255, 95, 20, 0) 100%);
+  box-shadow:
+    0 0 30px rgba(255, 180, 60, 0.45),
+    0 0 90px rgba(255, 130, 30, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title-text-box {
+  width: min(760px, 90%);
+  min-height: 86px;
+  padding: 14px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.title-text {
+  margin: 0;
+  font-size: clamp(1rem, 1.25vw, 1.15rem);
+  line-height: 1.45;
+  color: #eef6ff;
+}
+
+.title-start-btn {
+  margin-top: 0;
+  min-width: 220px;
+}
+
+.mode-title {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 3rem);
+}
+
+.mode-subtitle {
+  margin: 0;
+  color: #e8f2ff;
+  font-size: 1.1rem;
+}
+
+.mode-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 24px;
+  margin-top: 10px;
+}
+
+.mode-card {
+  position: relative;
+  border: none;
+  border-radius: 26px;
+  padding: 24px 22px;
+  min-height: 180px;
+  text-align: left;
+  color: white;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 0 18px rgba(80, 160, 255, 0.12),
+    inset 0 0 18px rgba(255, 255, 255, 0.03);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  overflow: hidden;
+}
+
+.mode-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 0 24px rgba(120, 180, 255, 0.18),
+    inset 0 0 18px rgba(255, 255, 255, 0.05);
+}
+
+.mode-card.disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.mode-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 4px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 40, 180, 0.72),
+    rgba(180, 70, 255, 0.68),
+    rgba(90, 220, 255, 0.62),
+    rgba(120, 40, 255, 0.74)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.mode-card-title {
+  position: relative;
+  margin: 0 0 10px;
+  font-size: 1.45rem;
+  font-weight: bold;
+  color: #ffe48e;
+}
+
+.mode-card-text {
+  position: relative;
+  margin: 0;
+  color: #eef6ff;
+  line-height: 1.45;
+  font-size: 1rem;
+}
+
+.main-btn {
+  margin-top: 28px;
+  border: none;
+  border-radius: 18px;
+  padding: 18px 34px;
+  font-size: clamp(1.2rem, 1.8vw, 1.6rem);
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(135deg, #4da8ff, #7a6dff);
+  cursor: pointer;
+  box-shadow: 0 0 18px rgba(90, 160, 255, 0.35);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.main-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 26px rgba(90, 160, 255, 0.55);
+}
+
+/* SPIEL */
+
+.game-screen {
+  padding: 14px;
+  gap: 10px;
+}
+
+.game-controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 4px 4px 0;
+}
+
+.control-btn {
+  border: none;
+  border-radius: 16px;
+  padding: 14px 24px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: white;
+  background: rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  box-shadow: 0 0 16px rgba(90, 160, 255, 0.28);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.control-btn:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 24px rgba(90, 160, 255, 0.42);
+}
+
+.game-layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(340px, 0.95fr);
+  gap: 18px;
+  min-height: 0;
+  align-items: center;
+}
+
+.quiz-layout-only {
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.95fr);
+}
+
+.solar-panel {
+  position: relative;
+  min-height: 520px;
+  overflow: visible;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.solar-panel::before {
+  display: none;
+}
+
+.sun-wrap {
+  position: absolute;
+  left: -650px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 900px;
+  height: 900px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.sun-wrap img,
+.sun-fallback {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.sun-fallback {
+  background:
+    radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.35), transparent 35%),
+    radial-gradient(circle, rgba(255, 210, 90, 0.98), rgba(255, 150, 40, 0.88) 58%, rgba(255, 95, 20, 0.65) 78%, rgba(255, 95, 20, 0) 100%);
+  box-shadow:
+    0 0 40px rgba(255, 186, 54, 0.5),
+    0 0 120px rgba(255, 140, 40, 0.22);
+}
+
+.orbit-area {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  margin-left: 150px;
+  z-index: 2;
+}
+
+.orbit-rings {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.orbit-ring {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 1600px;
+  border-radius: 50%;
+  border: 3px solid rgba(170, 220, 255, 0.24);
+  box-shadow: 0 0 10px rgba(120, 180, 255, 0.05);
+  pointer-events: none;
+}
+
+.ring-1 { width: 3000px; left: -201%; }
+.ring-2 { width: 2800px; left: -177%; }
+.ring-3 { width: 2600px; left: -153%; }
+.ring-4 { width: 2400px; left: -128%; }
+.ring-5 { width: 2200px; left: -104%; }
+.ring-6 { width: 2000px; left: -80%; }
+.ring-7 { width: 1800px; left: -56%; }
+.ring-8 { width: 1600px; left: -31%; }
+
+.orbit-ring.active-ring {
+  border-color: rgba(255, 220, 120, 0.28);
+  box-shadow:
+    0 0 18px rgba(255, 220, 120, 0.12),
+    0 0 34px rgba(255, 190, 80, 0.08);
+}
+
+.slots {
+  width: 100%;
+  height: 260px;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.planet-slot {
+  width: 185px;
+  height: 185px;
+  border-radius: 50%;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03) 58%, rgba(255, 255, 255, 0.01) 100%);
+  border: 3px dashed rgba(255, 255, 255, 0.2);
+  transition: 0.25s ease;
+  overflow: hidden;
+}
+
+.planet-slot.active-slot {
+  border-color: rgba(255, 220, 120, 0.95);
+  box-shadow:
+    0 0 16px rgba(255, 220, 120, 0.38),
+    0 0 36px rgba(255, 190, 80, 0.28);
+  transform: translate(-50%, -50%) scale(1.05) !important;
+}
+
+.planet-slot.correct-slot {
+  border-style: solid;
+  border-color: rgba(150, 255, 190, 0.9);
+  box-shadow:
+    0 0 18px rgba(120, 255, 180, 0.28),
+    inset 0 0 16px rgba(255, 255, 255, 0.08);
+}
+
+.slot-placeholder {
+  width: 70%;
+  height: 70%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+.slot-planet-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: scale(1);
+}
+
+.slot-planet-image.pop-in {
+  animation: popInImage 0.88s ease;
+}
+
+@keyframes popInImage {
+  from {
+    transform: scale(0.55);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.selection-panel {
+  padding: 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 0;
+  align-self: center;
+  justify-self: center;
+  width: 100%;
+  max-width: 390px;
+  height: fit-content;
+  max-height: 620px;
+  margin-top: -110px;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+.selection-title {
+  font-size: clamp(1.05rem, 1.35vw, 1.3rem);
+  font-weight: bold;
+  text-align: center;
+  color: #eef6ff;
+  text-shadow: 0 0 10px rgba(120, 180, 255, 0.18);
+}
+
+.planet-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 15px;
+  justify-items: center;
+  align-content: start;
+}
+
+.planet-card {
+  width: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  cursor: pointer;
+  user-select: none;
+  text-align: center;
+}
+
+.planet-button {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 2px solid rgba(150, 200, 255, 0.28);
+  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.planet-card:hover .planet-button {
+  transform: scale(1.05);
+  border-color: rgba(255, 230, 150, 0.8);
+  box-shadow: 0 0 16px rgba(255, 220, 120, 0.22);
+}
+
+.planet-card.disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.planet-card.wrong .planet-button {
+  animation: wrongShake 0.35s ease;
+  border-color: rgba(255, 110, 110, 0.9);
+  box-shadow: 0 0 14px rgba(255, 90, 90, 0.22);
+}
+
+.planet-name {
+  font-size: 1.02rem;
+  font-weight: bold;
+  line-height: 1.1;
+  color: #eef6ff;
+  pointer-events: none;
+}
+
+.planet-thumb {
+  width: 130px;
+  height: 130px;
+  object-fit: contain;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.info-panel-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding-top: 2px;
+}
+
+.info-panel {
+  width: min(850px, 72%);
+  min-height: 78px;
+  padding: 10px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+  margin-left: -340px;
+}
+
+.info-title {
+  font-size: clamp(1rem, 1.2vw, 1.5rem);
+  font-weight: bold;
+  color: #ffe48e;
+}
+
+.info-text {
+  font-size: clamp(0.88rem, 1vw, 1.3rem);
+  line-height: 1.25;
+  color: #eef6ff;
+}
+
+/* QUIZ */
+
+.quiz-question-box {
+  width: min(900px, 74%);
+  min-height: 110px;
+  padding: 16px 22px;
+  text-align: center;
+  margin: 0 auto 8px;
+}
+
+.quiz-question-label {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #ffe48e;
+  margin-bottom: 8px;
+}
+
+.quiz-question-text {
+  font-size: 1.2rem;
+  line-height: 1.4;
+  color: #eef6ff;
+}
+
+/* ENDSCREEN */
+
+.end-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 10, 25, 0);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 20;
+}
+
+.end-overlay.active {
+  display: flex;
+}
+
+.end-box {
+  width: min(760px, 95%);
+  text-align: center;
+  padding: 42px 32px;
+}
+
+.end-box h2 {
+  margin: 0 0 16px;
+  font-size: clamp(2rem, 3vw, 3rem);
+}
+
+.end-box p {
+  margin: 0 0 24px;
+  font-size: clamp(1.1rem, 1.5vw, 1.35rem);
+  color: #e7f2ff;
+}
+
+.memory-box {
+  margin: 0 0 24px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.03);
+}
+
+.memory-label {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #ffe48e;
+  margin-bottom: 8px;
+}
+
+.memory-phrase {
+  font-size: 1.08rem;
+  line-height: 1.5;
+  color: #eef6ff;
+}
+
+.memory-word {
+  display: inline-block;
+  margin-right: 0.18em;
+}
+
+.memory-initial {
+  font-size: 1.45em;
+  font-weight: 900;
+  color: #ffe48e;
+  text-shadow: 0 0 10px rgba(255, 228, 142, 0.18);
+}
+
+.end-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ANIMATIONEN */
+
+@keyframes wrongShake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-7px); }
+  50% { transform: translateX(7px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1450px) {
+  .game-layout {
+    grid-template-columns: minmax(0, 2.1fr) minmax(250px, 0.82fr);
+  }
+
+  .planet-slot {
+    width: 102px;
+    height: 102px;
+  }
+
+  .orbit-area {
+    min-height: 360px;
+    margin-left: 105px;
+  }
+
+  .sun-wrap {
+    width: 320px;
+    height: 320px;
+    left: -145px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .mode-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .game-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .selection-panel {
+    max-width: 560px;
+    max-height: none;
+    margin-top: 0;
+  }
+
+  .planet-list {
+    grid-template-columns: repeat(4, minmax(92px, 1fr));
+  }
+
+  .orbit-area {
+    min-height: 300px;
+    margin-left: 90px;
+  }
+
+  .info-panel,
+  .quiz-question-box {
+    width: min(760px, 92%);
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  body {
+    padding: 10px;
+  }
+
+  .planet-slot {
+    width: 84px;
+    height: 84px;
+  }
+
+  .sun-wrap {
+    width: 220px;
+    height: 220px;
+    left: -90px;
+  }
+
+  .orbit-area {
+    min-height: 230px;
+    margin-left: 60px;
+  }
+
+  .planet-list {
+    grid-template-columns: repeat(2, minmax(92px, 1fr));
+  }
+
+  .selection-panel {
+    max-width: 320px;
+  }
+
+  .planet-card {
+    width: 108px;
+  }
+
+  .planet-button {
+    width: 108px;
+    height: 108px;
+  }
+
+  .planet-thumb {
+    width: 48px;
+    height: 48px;
+  }
+
+  .planet-name {
+    font-size: 0.82rem;
+  }
+
+  .info-panel,
+  .quiz-question-box {
+    width: 94%;
+  }
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Planeten Expedition – Größe</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <section class="screen active game-screen">
+      <div class="game-controls">
+        <button class="control-btn" onclick="location.href='index.html'">Zurück</button>
+        <button id="resetBtn" class="control-btn">Neustart</button>
+      </div>
+
+      <div class="game-layout">
+        <div class="solar-panel">
+          <div class="orbit-area">
+            <div id="slots" class="slots"></div>
+          </div>
+        </div>
+
+        <div class="selection-panel">
+          <div id="selectionTitle" class="selection-title"></div>
+          <div id="planetList" class="planet-list"></div>
+        </div>
+      </div>
+
+      <div class="info-panel-wrap">
+        <div class="info-panel panel">
+          <div id="infoTitle" class="info-title"></div>
+          <div id="infoText" class="info-text"></div>
+        </div>
+      </div>
+    </section>
+
+    <div id="endOverlay" class="end-overlay">
+      <div class="end-box panel">
+        <h2>Geschafft!</h2>
+        <p id="endText"></p>
+
+        <div class="end-actions">
+          <button id="restartBtn" class="main-btn">Nochmal spielen</button>
+          <button class="main-btn" onclick="location.href='index.html'">Zur Modus-Auswahl</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/planet-data.js"></script>
+  <script src="js/game-common.js"></script>
+  <script>
+    initGame("size");
+  </script>
+</body>
+</html>

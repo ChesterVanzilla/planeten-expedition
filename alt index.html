@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Unser Sonnensystem</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      color: white;
+      background:
+        linear-gradient(rgba(6, 10, 28, 0.35), rgba(6, 10, 28, 0.35)),
+        url("bilder/hintergrund.png") center center / cover no-repeat fixed;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      height: 100%;
+      max-width: 1880px;
+      max-height: 1040px;
+      position: relative;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+      height: 100%;
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel {
+      position: relative;
+      isolation: isolate;
+      background: rgba(11, 18, 42, 0.72);
+      border-radius: 28px;
+      box-shadow:
+        0 0 18px rgba(80, 160, 255, 0.16),
+        inset 0 0 18px rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(8px);
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 5px;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 40, 180, 0.82),
+        rgba(180, 70, 255, 0.76),
+        rgba(90, 220, 255, 0.72),
+        rgba(120, 40, 255, 0.84)
+      );
+      -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .title-screen,
+    .mode-screen {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 28px;
+      padding: 40px;
+    }
+
+    .title-box,
+    .mode-box {
+      width: min(1100px, 94%);
+      padding: 42px 34px 34px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .title-logo-wrap {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 260px;
+    }
+
+    .title-logo {
+      max-width: min(760px, 90%);
+      max-height: 900px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 0 18px rgba(120, 180, 255, 0.22));
+    }
+
+    .logo-placeholder {
+      width: 220px;
+      height: 220px;
+      margin: 0 auto;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 35%, rgba(255,255,255,0.35), transparent 35%),
+        radial-gradient(circle, rgba(255,198,71,0.95), rgba(255,130,30,0.8) 58%, rgba(255,95,20,0.55) 78%, rgba(255,95,20,0) 100%);
+      box-shadow:
+        0 0 30px rgba(255, 180, 60, 0.45),
+        0 0 90px rgba(255, 130, 30, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .title-text-box {
+      width: min(760px, 90%);
+      min-height: 86px;
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .title-text {
+      margin: 0;
+      font-size: clamp(1rem, 1.25vw, 1.15rem);
+      line-height: 1.45;
+      color: #eef6ff;
+    }
+
+    .title-start-btn {
+      margin-top: 0;
+      min-width: 220px;
+    }
+
+    .mode-title {
+      margin: 0;
+      font-size: clamp(2rem, 3vw, 3rem);
+    }
+
+    .mode-subtitle {
+      margin: 0;
+      color: #e8f2ff;
+      font-size: 1.1rem;
+    }
+
+    .mode-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      gap: 24px;
+      margin-top: 10px;
+    }
+
+    .mode-card {
+      position: relative;
+      border: none;
+      border-radius: 26px;
+      padding: 24px 22px;
+      min-height: 180px;
+      text-align: left;
+      color: white;
+      cursor: pointer;
+      background: rgba(255,255,255,0.08);
+      box-shadow:
+        0 0 18px rgba(80, 160, 255, 0.12),
+        inset 0 0 18px rgba(255,255,255,0.03);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      overflow: hidden;
+    }
+
+    .mode-card:hover {
+      transform: translateY(-4px) scale(1.01);
+      box-shadow:
+        0 0 24px rgba(120, 180, 255, 0.18),
+        inset 0 0 18px rgba(255,255,255,0.05);
+    }
+
+    .mode-card.disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+
+    .mode-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 4px;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 40, 180, 0.72),
+        rgba(180, 70, 255, 0.68),
+        rgba(90, 220, 255, 0.62),
+        rgba(120, 40, 255, 0.74)
+      );
+      -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    .mode-card-title {
+      position: relative;
+      margin: 0 0 10px;
+      font-size: 1.45rem;
+      font-weight: bold;
+      color: #ffe48e;
+    }
+
+    .mode-card-text {
+      position: relative;
+      margin: 0;
+      color: #eef6ff;
+      line-height: 1.45;
+      font-size: 1rem;
+    }
+
+    .main-btn {
+      margin-top: 28px;
+      border: none;
+      border-radius: 18px;
+      padding: 18px 34px;
+      font-size: clamp(1.2rem, 1.8vw, 1.6rem);
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(135deg, #4da8ff, #7a6dff);
+      cursor: pointer;
+      box-shadow: 0 0 18px rgba(90, 160, 255, 0.35);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .main-btn:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 26px rgba(90, 160, 255, 0.55);
+    }
+
+    .game-screen {
+      padding: 14px;
+      gap: 10px;
+    }
+
+    .game-controls {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      padding: 4px 4px 0;
+    }
+
+    .control-btn {
+      border: none;
+      border-radius: 16px;
+      padding: 14px 24px;
+      font-size: 1rem;
+      font-weight: bold;
+      color: white;
+      background: rgba(255,255,255,0.12);
+      cursor: pointer;
+      box-shadow: 0 0 16px rgba(90, 160, 255, 0.28);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .control-btn:hover {
+      transform: scale(1.04);
+      box-shadow: 0 0 24px rgba(90, 160, 255, 0.42);
+    }
+
+    .game-layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(340px, 0.95fr);
+      gap: 18px;
+      min-height: 0;
+      align-items: center;
+    }
+
+    .solar-panel {
+      position: relative;
+      min-height: 520px;
+      overflow: visible;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .solar-panel::before {
+      display: none;
+    }
+
+    .sun-wrap {
+      position: absolute;
+      left: -650px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 900px;
+      height: 900px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .sun-wrap img,
+    .sun-fallback {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .sun-fallback {
+      background:
+        radial-gradient(circle at 35% 35%, rgba(255,255,255,0.35), transparent 35%),
+        radial-gradient(circle, rgba(255,210,90,0.98), rgba(255,150,40,0.88) 58%, rgba(255,95,20,0.65) 78%, rgba(255,95,20,0) 100%);
+      box-shadow:
+        0 0 40px rgba(255, 186, 54, 0.5),
+        0 0 120px rgba(255, 140, 40, 0.22);
+    }
+
+    .orbit-area {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 420px;
+      margin-left: 150px;
+      z-index: 2;
+    }
+
+    .orbit-rings {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .orbit-ring {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 1600px;
+      border-radius: 50%;
+      border: 3px solid rgba(170, 220, 255, 0.24);
+      box-shadow: 0 0 10px rgba(120, 180, 255, 0.05);
+      pointer-events: none;
+    }
+
+    .ring-1 { width: 3000px; left: -201%; }
+    .ring-2 { width: 2800px; left: -177%; }
+    .ring-3 { width: 2600px; left: -153%; }
+    .ring-4 { width: 2400px; left: -128%; }
+    .ring-5 { width: 2200px; left: -104%; }
+    .ring-6 { width: 2000px; left: -80%; }
+    .ring-7 { width: 1800px; left: -56%; }
+    .ring-8 { width: 1600px; left: -31%; }
+
+    .orbit-ring.active-ring {
+      border-color: rgba(255, 220, 120, 0.28);
+      box-shadow:
+        0 0 18px rgba(255, 220, 120, 0.12),
+        0 0 34px rgba(255, 190, 80, 0.08);
+    }
+
+    .slots {
+      width: 100%;
+      height: 260px;
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
+
+    .planet-slot {
+      width: 185px;
+      height: 185px;
+      border-radius: 50%;
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.14), rgba(255,255,255,0.03) 58%, rgba(255,255,255,0.01) 100%);
+      border: 3px dashed rgba(255, 255, 255, 0.2);
+      transition: 0.25s ease;
+      overflow: hidden;
+    }
+
+    .planet-slot.active-slot {
+      border-color: rgba(255, 220, 120, 0.95);
+      box-shadow:
+        0 0 16px rgba(255, 220, 120, 0.38),
+        0 0 36px rgba(255, 190, 80, 0.28);
+      transform: translate(-50%, -50%) scale(1.05) !important;
+    }
+
+    .planet-slot.correct-slot {
+      border-style: solid;
+      border-color: rgba(150, 255, 190, 0.9);
+      box-shadow:
+        0 0 18px rgba(120, 255, 180, 0.28),
+        inset 0 0 16px rgba(255, 255, 255, 0.08);
+    }
+
+    .slot-placeholder {
+      width: 70%;
+      height: 70%;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      filter: grayscale(1);
+      opacity: 0.5;
+    }
+
+    .slot-planet-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 50%;
+      pointer-events: none;
+      transform: scale(1);
+    }
+
+    .slot-planet-image.pop-in {
+      animation: popInImage 0.88s ease;
+    }
+
+    @keyframes popInImage {
+      from {
+        transform: scale(0.55);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .selection-panel {
+      padding: 22px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-height: 0;
+      align-self: center;
+      justify-self: center;
+      width: 100%;
+      max-width: 390px;
+      height: fit-content;
+      max-height: 620px;
+      margin-top: -110px;
+      background: transparent;
+      box-shadow: none;
+      border: none;
+    }
+
+    .selection-title {
+      font-size: clamp(1.05rem, 1.35vw, 1.3rem);
+      font-weight: bold;
+      text-align: center;
+      color: #eef6ff;
+      text-shadow: 0 0 10px rgba(120, 180, 255, 0.18);
+    }
+
+    .planet-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(120px, 1fr));
+      gap: 15px;
+      justify-items: center;
+      align-content: start;
+    }
+
+    .planet-card {
+      width: 150px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+      cursor: pointer;
+      user-select: none;
+      text-align: center;
+    }
+
+    .planet-button {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 2px solid rgba(150, 200, 255, 0.28);
+      background: rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .planet-card:hover .planet-button {
+      transform: scale(1.05);
+      border-color: rgba(255, 230, 150, 0.8);
+      box-shadow: 0 0 16px rgba(255, 220, 120, 0.22);
+    }
+
+    .planet-card.disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    .planet-card.wrong .planet-button {
+      animation: wrongShake 0.35s ease;
+      border-color: rgba(255, 110, 110, 0.9);
+      box-shadow: 0 0 14px rgba(255, 90, 90, 0.22);
+    }
+
+    .planet-name {
+      font-size: 1.02rem;
+      font-weight: bold;
+      line-height: 1.1;
+      color: #eef6ff;
+      pointer-events: none;
+    }
+
+    .planet-thumb {
+      width: 130px;
+      height: 130px;
+      object-fit: contain;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .info-panel-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      padding-top: 2px;
+    }
+
+    .info-panel {
+      width: min(850px, 72%);
+      min-height: 78px;
+      padding: 10px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      text-align: center;
+      margin-left: -340px;
+    }
+
+    .info-title {
+      font-size: clamp(1rem, 1.2vw, 1.5rem);
+      font-weight: bold;
+      color: #ffe48e;
+    }
+
+    .info-text {
+      font-size: clamp(0.88rem, 1vw, 1.3rem);
+      line-height: 1.25;
+      color: #eef6ff;
+    }
+
+    .end-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(4, 10, 25, 0);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      z-index: 20;
+    }
+
+    .end-overlay.active {
+      display: flex;
+    }
+
+    .end-box {
+      width: min(760px, 95%);
+      text-align: center;
+      padding: 42px 32px;
+    }
+
+    .end-box h2 {
+      margin: 0 0 16px;
+      font-size: clamp(2rem, 3vw, 3rem);
+    }
+
+    .end-box p {
+      margin: 0 0 24px;
+      font-size: clamp(1.1rem, 1.5vw, 1.35rem);
+      color: #e7f2ff;
+    }
+
+    .memory-box {
+      margin: 0 0 24px;
+      padding: 14px 18px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.03);
+    }
+
+    .memory-label {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #ffe48e;
+      margin-bottom: 8px;
+    }
+
+    .memory-phrase {
+      font-size: 1.08rem;
+      line-height: 1.5;
+      color: #eef6ff;
+    }
+
+    .memory-word {
+      display: inline-block;
+      margin-right: 0.18em;
+    }
+
+    .memory-initial {
+      font-size: 1.45em;
+      font-weight: 900;
+      color: #ffe48e;
+      text-shadow: 0 0 10px rgba(255, 228, 142, 0.18);
+    }
+
+    .quiz-question-box {
+      width: min(900px, 74%);
+      min-height: 110px;
+      padding: 16px 22px;
+      text-align: center;
+      margin: 0 auto 8px;
+    }
+
+    .quiz-question-label {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #ffe48e;
+      margin-bottom: 8px;
+    }
+
+    .quiz-question-text {
+      font-size: 1.2rem;
+      line-height: 1.4;
+      color: #eef6ff;
+    }
+
+    .end-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    @keyframes wrongShake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-7px); }
+      50% { transform: translateX(7px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
+
+    @media (max-width: 1450px) {
+      .game-layout {
+        grid-template-columns: minmax(0, 2.1fr) minmax(250px, 0.82fr);
+      }
+
+      .planet-slot {
+        width: 102px;
+        height: 102px;
+      }
+
+      .orbit-area {
+        min-height: 360px;
+        margin-left: 105px;
+      }
+
+      .sun-wrap {
+        width: 320px;
+        height: 320px;
+        left: -145px;
+      }
+    }
+
+    @media (max-width: 1180px) {
+      .mode-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .game-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .selection-panel {
+        max-width: 560px;
+        max-height: none;
+        margin-top: 0;
+      }
+
+      .planet-list {
+        grid-template-columns: repeat(4, minmax(92px, 1fr));
+      }
+
+      .orbit-area {
+        min-height: 300px;
+        margin-left: 90px;
+      }
+
+      .info-panel,
+      .quiz-question-box {
+        width: min(760px, 92%);
+        margin-left: 0;
+      }
+    }
+
+    @media (max-width: 900px) {
+      body {
+        padding: 10px;
+      }
+
+      .planet-slot {
+        width: 84px;
+        height: 84px;
+      }
+
+      .sun-wrap {
+        width: 220px;
+        height: 220px;
+        left: -90px;
+      }
+
+      .orbit-area {
+        min-height: 230px;
+        margin-left: 60px;
+      }
+
+      .planet-list {
+        grid-template-columns: repeat(2, minmax(92px, 1fr));
+      }
+
+      .selection-panel {
+        max-width: 320px;
+      }
+
+      .planet-card {
+        width: 108px;
+      }
+
+      .planet-button {
+        width: 108px;
+        height: 108px;
+      }
+
+      .planet-thumb {
+        width: 48px;
+        height: 48px;
+      }
+
+      .planet-name {
+        font-size: 0.82rem;
+      }
+
+      .info-panel,
+      .quiz-question-box {
+        width: 94%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section id="startScreen" class="screen title-screen active">
+      <div class="title-box">
+        <div class="title-logo-wrap">
+          <img
+            src="bilder/logo.png"
+            alt="Spiel-Logo"
+            class="title-logo"
+            onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='flex';"
+          />
+          <div id="logoFallback" class="logo-placeholder" style="display:none;"></div>
+        </div>
+
+        <div class="title-text-box panel">
+          <p class="title-text">
+            Bringe die Planeten in die richtige Reihenfolge und entdecke spannende Fakten über unser Sonnensystem.
+          </p>
+        </div>
+
+        <button id="toModeBtn" class="main-btn title-start-btn">Los geht's</button>
+      </div>
+    </section>
+
+    <section id="modeScreen" class="screen mode-screen">
+      <div class="mode-box">
+        <h2 class="mode-title">Wähle einen Spielmodus</h2>
+        <p class="mode-subtitle">Lerne unser Sonnensystem auf verschiedene Arten kennen.</p>
+
+        <div class="mode-grid">
+          <button class="mode-card" data-mode="order">
+            <div class="mode-card-title">Modus 1</div>
+            <p class="mode-card-text">Bringe die Planeten in die richtige Reihenfolge von der Sonne nach außen.</p>
+          </button>
+
+          <button class="mode-card" data-mode="size">
+            <div class="mode-card-title">Modus 2</div>
+            <p class="mode-card-text">Sortiere die Planeten nach ihrer Größe – vom kleinsten bis zum größten.</p>
+          </button>
+
+          <button class="mode-card" data-mode="quiz">
+            <div class="mode-card-title">Modus 3</div>
+            <p class="mode-card-text">Lies einen Hinweis und ordne den passenden Planeten zu.</p>
+          </button>
+
+          <button class="mode-card disabled" id="mode4Btn" type="button">
+            <div class="mode-card-title">Modus 4</div>
+            <p class="mode-card-text">Demnächst verfügbar.</p>
+          </button>
+        </div>
+
+        <button id="backToTitleBtn" class="main-btn">Zurück</button>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen game-screen">
+      <div class="game-controls">
+        <button id="backBtn" class="control-btn">Zurück</button>
+        <button id="resetBtn" class="control-btn">Neustart</button>
+      </div>
+
+      <div id="quizQuestionWrap" class="quiz-question-box panel" style="display:none;">
+        <div class="quiz-question-label">Welcher Planet ist gemeint?</div>
+        <div id="quizQuestionText" class="quiz-question-text"></div>
+      </div>
+
+      <div class="game-layout">
+        <div class="solar-panel" id="solarPanel">
+          <div class="sun-wrap" id="sunWrap">
+            <img src="bilder/sonne.png" alt="Sonne" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+            <div class="sun-fallback" style="display:none;"></div>
+          </div>
+
+          <div class="orbit-area" id="orbitArea">
+            <div class="orbit-rings" id="orbitRings">
+              <div class="orbit-ring ring-1"></div>
+              <div class="orbit-ring ring-2"></div>
+              <div class="orbit-ring ring-3"></div>
+              <div class="orbit-ring ring-4"></div>
+              <div class="orbit-ring ring-5"></div>
+              <div class="orbit-ring ring-6"></div>
+              <div class="orbit-ring ring-7"></div>
+              <div class="orbit-ring ring-8"></div>
+            </div>
+
+            <div id="slots" class="slots"></div>
+          </div>
+        </div>
+
+        <div class="selection-panel">
+          <div id="selectionTitle" class="selection-title"></div>
+          <div id="planetList" class="planet-list"></div>
+        </div>
+      </div>
+
+      <div class="info-panel-wrap">
+        <div class="info-panel panel">
+          <div id="infoTitle" class="info-title">Willkommen!</div>
+          <div id="infoText" class="info-text"></div>
+        </div>
+      </div>
+    </section>
+
+    <div id="endOverlay" class="end-overlay">
+      <div class="end-box panel">
+        <h2>Geschafft!</h2>
+        <p id="endText">Du hast alle Planeten richtig gelöst.</p>
+
+        <div class="memory-box" id="memoryBox">
+          <div class="memory-label">Merkspruch für die Planeten:</div>
+          <div id="memoryPhrase" class="memory-phrase"></div>
+        </div>
+
+        <div class="end-actions">
+          <button id="restartBtn" class="main-btn">Nochmal spielen</button>
+          <button id="backToStartBtn" class="main-btn">Zur Modus-Auswahl</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const planetData = [
+      {
+        id: "merkur",
+        name: "Merkur",
+        image: "bilder/merkur.png",
+        order: 1,
+        sizeRank: 1,
+        moons: 0,
+        facts: [
+          "Merkur ist der sonnennächste Planet.",
+          "Ein Jahr auf Merkur dauert nur 88 Erdentage.",
+          "Merkur ist einer der kleinsten Planeten im Sonnensystem.",
+          "Merkur gehört zu den Gesteinsplaneten.",
+          "Auf Merkur gibt es kaum eine richtige Atmosphäre."
+        ],
+        quizClues: [
+          "Ich bin der sonnennächste Planet.",
+          "Ein Jahr auf mir dauert nur 88 Erdentage.",
+          "Ich bin sehr klein und heiß."
+        ]
+      },
+      {
+        id: "venus",
+        name: "Venus",
+        image: "bilder/venus.png",
+        order: 2,
+        sizeRank: 6,
+        moons: 0,
+        facts: [
+          "Die Venus ist der heißeste Planet im Sonnensystem.",
+          "Die Venus ist fast so groß wie die Erde.",
+          "Dichte Wolken hüllen die Venus ein.",
+          "Ein Tag auf der Venus dauert sehr lange.",
+          "Die Venus wird oft Morgenstern oder Abendstern genannt."
+        ],
+        quizClues: [
+          "Ich bin der heißeste Planet.",
+          "Ich werde oft Morgenstern oder Abendstern genannt.",
+          "Ich bin fast so groß wie die Erde."
+        ]
+      },
+      {
+        id: "erde",
+        name: "Erde",
+        image: "bilder/erde.png",
+        order: 3,
+        sizeRank: 5,
+        moons: 1,
+        facts: [
+          "Die Erde ist unser Heimatplanet.",
+          "Die Erde ist der einzige bekannte Planet mit Leben.",
+          "Etwa 70 Prozent der Erdoberfläche sind mit Wasser bedeckt.",
+          "Die Erde hat einen Mond.",
+          "Die Erde gehört zu den inneren Gesteinsplaneten."
+        ],
+        quizClues: [
+          "Auf mir leben Menschen, Tiere und Pflanzen.",
+          "Ich bin unser Heimatplanet.",
+          "Ich habe genau einen Mond."
+        ]
+      },
+      {
+        id: "mars",
+        name: "Mars",
+        image: "bilder/mars.png",
+        order: 4,
+        sizeRank: 2,
+        moons: 2,
+        facts: [
+          "Der Mars wird auch der rote Planet genannt.",
+          "Auf dem Mars gibt es riesige Vulkane.",
+          "Der Mars hat zwei kleine Monde.",
+          "Der Mars ist kälter als die Erde.",
+          "Viele Raumsonden haben den Mars bereits untersucht."
+        ],
+        quizClues: [
+          "Man nennt mich den roten Planeten.",
+          "Ich habe zwei kleine Monde.",
+          "Viele Raumsonden haben mich untersucht."
+        ]
+      },
+      {
+        id: "jupiter",
+        name: "Jupiter",
+        image: "bilder/jupiter.png",
+        order: 5,
+        sizeRank: 8,
+        moons: 95,
+        facts: [
+          "Jupiter ist der größte Planet im Sonnensystem.",
+          "Jupiter ist ein Gasriese.",
+          "Auf Jupiter gibt es einen riesigen Sturm, den Großen Roten Fleck.",
+          "Jupiter hat viele Monde.",
+          "Jupiter ist viel größer als die Erde."
+        ],
+        quizClues: [
+          "Ich bin der größte Planet.",
+          "Auf mir gibt es den Großen Roten Fleck.",
+          "Ich bin ein großer Gasriese."
+        ]
+      },
+      {
+        id: "saturn",
+        name: "Saturn",
+        image: "bilder/saturn.png",
+        order: 6,
+        sizeRank: 7,
+        moons: 146,
+        facts: [
+          "Saturn ist für seine schönen Ringe bekannt.",
+          "Saturn ist ein großer Gasplanet.",
+          "Die Ringe des Saturn bestehen aus Eis und Gestein.",
+          "Saturn hat viele Monde.",
+          "Saturn ist der zweitgrößte Planet im Sonnensystem."
+        ],
+        quizClues: [
+          "Ich bin für meine großen Ringe bekannt.",
+          "Ich bin der zweitgrößte Planet.",
+          "Meine Ringe bestehen aus Eis und Gestein."
+        ]
+      },
+      {
+        id: "uranus",
+        name: "Uranus",
+        image: "bilder/uranus.png",
+        order: 7,
+        sizeRank: 4,
+        moons: 28,
+        facts: [
+          "Uranus ist ein Eisriese.",
+          "Uranus hat eine bläuliche Farbe.",
+          "Uranus dreht sich fast auf der Seite.",
+          "Uranus ist sehr weit von der Sonne entfernt.",
+          "Auch Uranus besitzt Ringe."
+        ],
+        quizClues: [
+          "Ich drehe mich fast auf der Seite.",
+          "Ich bin ein bläulicher Eisriese.",
+          "Ich bin weit von der Sonne entfernt."
+        ]
+      },
+      {
+        id: "neptun",
+        name: "Neptun",
+        image: "bilder/neptun.png",
+        order: 8,
+        sizeRank: 3,
+        moons: 16,
+        facts: [
+          "Neptun ist der äußerste Planet unseres Sonnensystems.",
+          "Neptun ist ein tiefblauer Eisriese.",
+          "Auf Neptun gibt es sehr starke Stürme.",
+          "Neptun ist sehr weit von der Sonne entfernt.",
+          "Ein Jahr auf Neptun dauert sehr, sehr lange."
+        ],
+        quizClues: [
+          "Ich bin der äußerste Planet.",
+          "Auf mir gibt es sehr starke Stürme.",
+          "Ich bin ein tiefblauer Eisriese."
+        ]
+      }
+    ];
+
+    const slotPositionsOrder = [
+      { left: "13%", top: "90px" },
+      { left: "23%", top: "230px" },
+      { left: "33%", top: "90px" },
+      { left: "43%", top: "230px" },
+      { left: "53%", top: "90px" },
+      { left: "63%", top: "230px" },
+      { left: "73%", top: "90px" },
+      { left: "83%", top: "230px" }
+    ];
+
+    const slotPositionsSize = [
+      { left: "12%", top: "160px" },
+      { left: "22%", top: "160px" },
+      { left: "32%", top: "160px" },
+      { left: "44%", top: "160px" },
+      { left: "56%", top: "160px" },
+      { left: "68%", top: "160px" },
+      { left: "80%", top: "160px" },
+      { left: "92%", top: "160px" }
+    ];
+
+    const memoryPhrases = [
+      "Mein Vater erklärt mir jeden Sonntag unseren Nachthimmel.",
+      "Meine Freunde entdecken morgens jeden Stern und Nebel.",
+      "Mein kleiner Esel mag jeden Sommer unsere Nachbarn.",
+      "Meine vier Enten mögen jeden Samstag unsere Nudeln."
+    ];
+
+    const positiveMessages = [
+      "Super!",
+      "Klasse!",
+      "Richtig!",
+      "Sehr gut!",
+      "Toll gemacht!"
+    ];
+
+    const wrongMessages = [
+      "Dieser Planet kommt erst später.",
+      "Noch nicht ganz. Versuch es nochmal.",
+      "Dieser Planet ist noch nicht an der Reihe.",
+      "Guter Versuch! Schau nochmal genau hin."
+    ];
+
+    const modeConfig = {
+      order: {
+        title: "Planeten-Reihenfolge",
+        introTitle: "Los geht's!",
+        introText: "Bringe die Planeten in die richtige Reihenfolge. Beginne mit dem sonnennächsten Planeten.",
+        selectionTitle: "Wähle den richtigen Planeten",
+        endText: "Du hast alle Planeten richtig in die Reihenfolge des Sonnensystems gebracht.",
+        showMemory: true,
+        showOrbits: true,
+        showSun: true
+      },
+      size: {
+        title: "Größen-Reihenfolge",
+        introTitle: "Wer ist der Kleinste?",
+        introText: "Sortiere die Planeten nach ihrer Größe – vom kleinsten bis zum größten Planeten.",
+        selectionTitle: "Wähle den nächsten Planeten",
+        endText: "Du hast alle Planeten richtig nach ihrer Größe sortiert.",
+        showMemory: false,
+        showOrbits: false,
+        showSun: false
+      },
+      quiz: {
+        title: "Planeten-Quiz",
+        introTitle: "Bereit fürs Quiz?",
+        introText: "Lies den Hinweis und wähle den passenden Planeten aus.",
+        selectionTitle: "Wähle den passenden Planeten",
+        endText: "Du hast alle Quizfragen richtig gelöst.",
+        showMemory: false,
+        showOrbits: false,
+        showSun: false
+      }
+    };
+
+    const startScreen = document.getElementById("startScreen");
+    const modeScreen = document.getElementById("modeScreen");
+    const gameScreen = document.getElementById("gameScreen");
+    const toModeBtn = document.getElementById("toModeBtn");
+    const backToTitleBtn = document.getElementById("backToTitleBtn");
+    const modeCards = document.querySelectorAll(".mode-card[data-mode]");
+    const backBtn = document.getElementById("backBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const backToStartBtn = document.getElementById("backToStartBtn");
+    const slotsContainer = document.getElementById("slots");
+    const planetList = document.getElementById("planetList");
+    const selectionTitle = document.getElementById("selectionTitle");
+    const infoTitle = document.getElementById("infoTitle");
+    const infoText = document.getElementById("infoText");
+    const endOverlay = document.getElementById("endOverlay");
+    const endText = document.getElementById("endText");
+    const memoryBox = document.getElementById("memoryBox");
+    const memoryPhrase = document.getElementById("memoryPhrase");
+    const orbitRings = document.getElementById("orbitRings");
+    const sunWrap = document.getElementById("sunWrap");
+    const quizQuestionWrap = document.getElementById("quizQuestionWrap");
+    const quizQuestionText = document.getElementById("quizQuestionText");
+
+    let currentIndex = 0;
+    let shuffledPlanets = [];
+    let currentMode = null;
+    let activeSequence = [];
+    let currentQuizQuestions = [];
+
+    function shuffleArray(array) {
+      const cloned = [...array];
+      for (let i = cloned.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cloned[i], cloned[j]] = [cloned[j], cloned[i]];
+      }
+      return cloned;
+    }
+
+    function getRandomItem(array) {
+      return array[Math.floor(Math.random() * array.length)];
+    }
+
+    function formatMemoryPhrase(phrase) {
+      return phrase
+        .split(" ")
+        .map(word => {
+          if (!word) return "";
+          const firstChar = word.charAt(0);
+          const rest = word.slice(1);
+          return `<span class="memory-word"><span class="memory-initial">${firstChar}</span>${rest}</span>`;
+        })
+        .join(" ");
+    }
+
+    function showScreen(screen) {
+      [startScreen, modeScreen, gameScreen].forEach(s => s.classList.remove("active"));
+      screen.classList.add("active");
+      endOverlay.classList.remove("active");
+    }
+
+    function getSequenceForMode(mode) {
+      if (mode === "order") {
+        return [...planetData].sort((a, b) => a.order - b.order);
+      }
+      if (mode === "size") {
+        return [...planetData].sort((a, b) => a.sizeRank - b.sizeRank);
+      }
+      return [...planetData];
+    }
+
+    function buildQuizQuestions() {
+      return shuffleArray(
+        planetData.map(planet => ({
+          planetId: planet.id,
+          question: getRandomItem(planet.quizClues)
+        }))
+      );
+    }
+
+    function getSlotPositionsForMode(mode) {
+      return mode === "size" ? slotPositionsSize : slotPositionsOrder;
+    }
+
+    function getPlanetScaleForMode(mode, planet) {
+      if (mode !== "size") return 1;
+
+      const scaleMap = {
+        merkur: 0.52,
+        mars: 0.62,
+        neptun: 0.8,
+        uranus: 0.9,
+        erde: 0.98,
+        venus: 1.02,
+        saturn: 1.22,
+        jupiter: 1.36
+      };
+
+      return scaleMap[planet.id] || 1;
+    }
+
+    function updateModeUI() {
+      const config = modeConfig[currentMode];
+      selectionTitle.textContent = config.selectionTitle;
+      infoTitle.textContent = config.introTitle;
+      infoText.textContent = config.introText;
+      endText.textContent = config.endText;
+      memoryBox.style.display = config.showMemory ? "block" : "none";
+      orbitRings.style.display = config.showOrbits ? "block" : "none";
+      sunWrap.style.display = config.showSun ? "block" : "none";
+      quizQuestionWrap.style.display = currentMode === "quiz" ? "block" : "none";
+
+      if (currentMode === "quiz" && currentQuizQuestions[currentIndex]) {
+        quizQuestionText.textContent = currentQuizQuestions[currentIndex].question;
+      }
+    }
+
+    function createSlots() {
+      slotsContainer.innerHTML = "";
+
+      if (currentMode === "quiz") {
+        return;
+      }
+
+      const slotPositions = getSlotPositionsForMode(currentMode);
+
+      activeSequence.forEach((planet, index) => {
+        const slot = document.createElement("div");
+        slot.className = "planet-slot";
+        slot.dataset.index = index;
+        slot.style.left = slotPositions[index].left;
+        slot.style.top = slotPositions[index].top;
+        slot.style.transform = "translate(-50%, -50%)";
+
+        if (index === currentIndex) {
+          slot.classList.add("active-slot");
+        }
+
+        if (index < currentIndex) {
+          slot.classList.add("correct-slot");
+        }
+
+        if (index < currentIndex) {
+          const img = document.createElement("img");
+          img.className = "slot-planet-image";
+          if (index === currentIndex - 1) {
+            img.classList.add("pop-in");
+          }
+
+          const scale = getPlanetScaleForMode(currentMode, planet);
+          img.style.transform = `scale(${scale})`;
+          img.src = planet.image;
+          img.alt = planet.name;
+          img.onerror = function () {
+            this.style.display = "none";
+            const fallback = document.createElement("div");
+            fallback.className = "slot-placeholder";
+            fallback.style.opacity = "0.9";
+            fallback.style.filter = "none";
+            slot.appendChild(fallback);
+          };
+          slot.appendChild(img);
+        } else {
+          const placeholder = document.createElement("div");
+          placeholder.className = "slot-placeholder";
+          placeholder.style.transform = `scale(${getPlanetScaleForMode(currentMode, planet)})`;
+          slot.appendChild(placeholder);
+        }
+
+        slotsContainer.appendChild(slot);
+      });
+    }
+
+    function createPlanetCards() {
+      planetList.innerHTML = "";
+
+      shuffledPlanets.forEach((planet) => {
+        const card = document.createElement("div");
+        card.className = "planet-card";
+        card.dataset.id = planet.id;
+
+        if (planet.used) {
+          card.classList.add("disabled");
+        }
+
+        const button = document.createElement("div");
+        button.className = "planet-button";
+
+        const img = document.createElement("img");
+        img.className = "planet-thumb";
+        img.src = planet.image;
+        img.alt = planet.name;
+        img.onerror = function () {
+          this.style.display = "none";
+        };
+
+        if (currentMode === "size") {
+          img.style.transform = `scale(${getPlanetScaleForMode(currentMode, planet)})`;
+        }
+
+        const name = document.createElement("div");
+        name.className = "planet-name";
+        name.textContent = planet.name;
+
+        button.appendChild(img);
+        card.appendChild(button);
+        card.appendChild(name);
+
+        if (!planet.used) {
+          card.addEventListener("click", () => handlePlanetClick(planet, card));
+        }
+
+        planetList.appendChild(card);
+      });
+    }
+
+    function updateInfo(title, text) {
+      infoTitle.textContent = title;
+      infoText.textContent = text;
+    }
+
+    function updateActiveOrbit() {
+      const rings = document.querySelectorAll(".orbit-ring");
+      rings.forEach((ring, index) => {
+        ring.classList.toggle("active-ring", currentMode === "order" && index === currentIndex);
+      });
+    }
+
+    function completeMode() {
+      if (modeConfig[currentMode].showMemory) {
+        memoryPhrase.innerHTML = formatMemoryPhrase(getRandomItem(memoryPhrases));
+      }
+      setTimeout(() => {
+        endOverlay.classList.add("active");
+      }, 500);
+    }
+
+    function handlePlanetClick(clickedPlanet, cardElement) {
+      if (currentMode === "quiz") {
+        const expectedQuestion = currentQuizQuestions[currentIndex];
+        if (!expectedQuestion) return;
+
+        if (clickedPlanet.id === expectedQuestion.planetId) {
+          clickedPlanet.used = true;
+          const praise = getRandomItem(positiveMessages);
+          const fact = getRandomItem(planetData.find(p => p.id === clickedPlanet.id).facts);
+          currentIndex++;
+
+          updateInfo(praise, fact);
+          createPlanetCards();
+
+          if (currentIndex < currentQuizQuestions.length) {
+            quizQuestionText.textContent = currentQuizQuestions[currentIndex].question;
+          } else {
+            completeMode();
+          }
+        } else {
+          cardElement.classList.add("wrong");
+          setTimeout(() => cardElement.classList.remove("wrong"), 400);
+          updateInfo("Fast!", getRandomItem(wrongMessages));
+        }
+        return;
+      }
+
+      if (currentIndex >= activeSequence.length) return;
+
+      const expectedPlanet = activeSequence[currentIndex];
+
+      if (clickedPlanet.id === expectedPlanet.id) {
+        clickedPlanet.used = true;
+        currentIndex++;
+
+        const praise = getRandomItem(positiveMessages);
+        const fact = getRandomItem(expectedPlanet.facts);
+
+        updateInfo(praise, fact);
+        createSlots();
+        createPlanetCards();
+        updateActiveOrbit();
+
+        if (currentIndex >= activeSequence.length) {
+          completeMode();
+        }
+      } else {
+        cardElement.classList.add("wrong");
+        setTimeout(() => cardElement.classList.remove("wrong"), 400);
+        updateInfo("Fast!", getRandomItem(wrongMessages));
+      }
+    }
+
+    function startMode(mode) {
+      currentMode = mode;
+      currentIndex = 0;
+      activeSequence = getSequenceForMode(mode);
+      currentQuizQuestions = mode === "quiz" ? buildQuizQuestions() : [];
+      shuffledPlanets = shuffleArray(
+        planetData.map(planet => ({ ...planet, used: false }))
+      );
+
+      updateModeUI();
+      createSlots();
+      createPlanetCards();
+      updateActiveOrbit();
+
+      showScreen(gameScreen);
+    }
+
+    function goToModeScreen() {
+      showScreen(modeScreen);
+    }
+
+    function goToStart() {
+      showScreen(startScreen);
+    }
+
+    toModeBtn.addEventListener("click", goToModeScreen);
+    backToTitleBtn.addEventListener("click", goToStart);
+
+    modeCards.forEach(card => {
+      card.addEventListener("click", () => {
+        startMode(card.dataset.mode);
+      });
+    });
+
+    backBtn.addEventListener("click", goToModeScreen);
+    resetBtn.addEventListener("click", () => {
+      if (currentMode) startMode(currentMode);
+    });
+    restartBtn.addEventListener("click", () => {
+      if (currentMode) startMode(currentMode);
+    });
+    backToStartBtn.addEventListener("click", goToModeScreen);
+
+    document.addEventListener("gesturestart", function (e) {
+      e.preventDefault();
+    });
+
+    document.addEventListener("dblclick", function (e) {
+      e.preventDefault();
+    }, { passive: false });
+  </script>
+</body>
+</html>
