@@ -8,6 +8,10 @@ function initGame(mode) {
   const quizLevelSelect = document.getElementById("quizLevelSelect");
   const quizGameArea = document.getElementById("quizGameArea");
   const quizFeedback = document.getElementById("quizFeedback");
+const quizMissionTitle = document.getElementById("quizMissionTitle");
+const quizProgressText = document.getElementById("quizProgressText");
+const quizProgressFill = document.getElementById("quizProgressFill");
+const quizStarsText = document.getElementById("quizStarsText");
   const endOverlay = document.getElementById("endOverlay");
   const endText = document.getElementById("endText");
   const memoryBox = document.getElementById("memoryBox");
@@ -27,10 +31,12 @@ function initGame(mode) {
   const restartBtn = document.getElementById("restartBtn");
 
     let currentIndex = 0;
-  let shuffledPlanets = [];
-  let activeSequence = [];
-  let currentQuizQuestions = [];
-  let currentQuizLevel = null;
+let shuffledPlanets = [];
+let activeSequence = [];
+let currentQuizQuestions = [];
+let currentQuizLevel = null;
+let quizStars = 0;
+let questionHadWrongAttempt = false;
 
   function shuffleArray(array) {
     const cloned = [...array];
@@ -79,7 +85,7 @@ function initGame(mode) {
     const allFacts = planetData
       .filter(planet => planet.id !== correctPlanetId)
       .flatMap(planet =>
-        planet.facts.map(fact => ({
+        planet.quizfacts.map(fact => ({
           planetId: planet.id,
           text: fact
         }))
@@ -126,17 +132,17 @@ function initGame(mode) {
 
     return shuffleArray(
       planetData.map(planet => {
-        const correctFact = getRandomItem(planet.facts);
+        const correctFact = getRandomItem(planet.quizfacts);
         const wrongFacts = getRandomWrongFacts(planet.id, correctFact, 3);
 
         const answers = shuffleArray([
           {
-            type: "fact",
+            type: "quizfact",
             text: correctFact,
             correct: true
           },
           ...wrongFacts.map(fact => ({
-            type: "fact",
+            type: "quizfact",
             text: fact.text,
             correct: false
           }))
@@ -256,6 +262,61 @@ function updateQuizLayout() {
   }
 }
 
+function getQuizMissionTitle() {
+  if (currentQuizLevel === 1) {
+    return "Mission 1: Finde den Planeten";
+  }
+
+  if (currentQuizLevel === 2) {
+    return "Mission 2: Finde den passenden Fakt";
+  }
+
+  return "Quiz-Mission";
+}
+
+function updateQuizStatus() {
+  if (mode !== "quiz") return;
+
+  const totalQuestions = currentQuizQuestions.length || planetData.length;
+  const currentQuestionNumber = Math.min(currentIndex + 1, totalQuestions);
+
+  if (quizMissionTitle) {
+    quizMissionTitle.textContent = getQuizMissionTitle();
+  }
+
+  if (quizProgressText) {
+    quizProgressText.textContent = `Frage ${currentQuestionNumber} von ${totalQuestions}`;
+  }
+
+  if (quizProgressFill) {
+    const progressPercent = totalQuestions > 0 ? (currentIndex / totalQuestions) * 100 : 0;
+    quizProgressFill.style.width = `${progressPercent}%`;
+  }
+
+  if (quizStarsText) {
+    quizStarsText.textContent = `⭐ ${quizStars} / ${totalQuestions}`;
+  }
+}
+
+function getQuizRank() {
+  const totalQuestions = currentQuizQuestions.length || planetData.length;
+  const ratio = totalQuestions > 0 ? quizStars / totalQuestions : 0;
+
+  if (ratio === 1) {
+    return "Astro-Meister";
+  }
+
+  if (ratio >= 0.75) {
+    return "Planetendetektiv";
+  }
+
+  if (ratio >= 0.5) {
+    return "Weltraumforscher";
+  }
+
+  return "Sternenstarter";
+}
+
   function renderQuizQuestion() {
     if (mode !== "quiz" || !quizAnswerGrid) return;
 
@@ -263,6 +324,9 @@ function updateQuizLayout() {
     if (!currentQuestion) return;
 
     quizAnswerGrid.innerHTML = "";
+
+updateQuizStatus();
+questionHadWrongAttempt = false;
 
     quizLevel1Btn?.classList.toggle("active-level-btn", currentQuizLevel === 1);
     quizLevel2Btn?.classList.toggle("active-level-btn", currentQuizLevel === 2);
@@ -474,23 +538,44 @@ function updateQuizLayout() {
   }
 
   function completeMode() {
+  if (mode === "quiz") {
+    const totalQuestions = currentQuizQuestions.length || planetData.length;
+    const rank = getQuizRank();
+
+    if (endText) {
+      endText.textContent = `Du hast ${quizStars} von ${totalQuestions} Sternen gesammelt. Rang: ${rank}`;
+    }
+  } else {
     if (modeConfig[mode].showMemory && memoryPhrase) {
       memoryPhrase.innerHTML = formatMemoryPhrase(getRandomItem(memoryPhrases));
     }
 
-    setTimeout(() => {
-      if (endOverlay) {
-        endOverlay.classList.add("active");
-      }
-    }, 500);
+    if (endText) {
+      endText.textContent = modeConfig[mode].endText;
+    }
   }
+
+  setTimeout(() => {
+    if (endOverlay) {
+      endOverlay.classList.add("active");
+    }
+  }, 500);
+}
 
   function handleQuizAnswer(answer, cardElement) {
   if (!answer) return;
 
   if (answer.correct) {
+    if (!questionHadWrongAttempt) {
+      quizStars++;
+    }
+
+    updateQuizStatus();
+
     if (quizFeedback) {
-      quizFeedback.textContent = "Richtig!";
+      quizFeedback.textContent = !questionHadWrongAttempt
+        ? "Stark! Stern gesammelt!"
+        : "Richtig!";
     }
 
     currentIndex++;
@@ -511,14 +596,17 @@ function updateQuizLayout() {
       }, 450);
     }
   } else {
+    questionHadWrongAttempt = true;
     cardElement.classList.add("wrong");
     setTimeout(() => cardElement.classList.remove("wrong"), 400);
 
     if (quizFeedback) {
-      quizFeedback.textContent = "Fast! Versuch es nochmal.";
+      quizFeedback.textContent = "Fast! Für diese Frage gibt es jetzt keinen Stern mehr.";
     }
   }
 }
+
+    
 
   function handlePlanetClick(clickedPlanet, cardElement) {
     if (mode === "quiz") {
@@ -552,10 +640,12 @@ function updateQuizLayout() {
 
   function start() {
   currentIndex = 0;
-  activeSequence = getSequenceForMode();
-  shuffledPlanets = shuffleArray(
-    planetData.map(planet => ({ ...planet, used: false }))
-  );
+quizStars = 0;
+questionHadWrongAttempt = false;
+activeSequence = getSequenceForMode();
+shuffledPlanets = shuffleArray(
+  planetData.map(planet => ({ ...planet, used: false }))
+);
 
   if (endOverlay) {
     endOverlay.classList.remove("active");
@@ -580,8 +670,9 @@ function updateQuizLayout() {
     }
 
     currentQuizQuestions = buildQuizQuestions();
-    updateQuizLayout();
-    renderQuizQuestion();
+updateQuizLayout();
+updateQuizStatus();
+renderQuizQuestion();
   } else {
     createPlanetCards();
   }

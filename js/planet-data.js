@@ -13,6 +13,13 @@ const planetData = [
       "Merkur gehört zu den Gesteinsplaneten.",
       "Auf Merkur gibt es kaum eine richtige Atmosphäre."
     ],
+quizfacts: [
+      "Dieser Planet ist der sonnennächste Planet.",
+      "Ein Jahr auf mir dauert nur 88 Erdentage.",
+      "Ich bin einer der kleinsten Planeten im Sonnensystem.",
+      "Die Oberfläche ähnelt der des Mondes.",
+      "Ich habe weder Monde, noch Ringe."
+    ],
     quizClues: [
       "Ich bin der sonnennächste Planet.",
       "Ein Jahr auf mir dauert nur 88 Erdentage.",
@@ -30,8 +37,15 @@ const planetData = [
       "Die Venus ist der heißeste Planet im Sonnensystem.",
       "Die Venus ist fast so groß wie die Erde.",
       "Dichte Wolken hüllen die Venus ein.",
-      "Ein Tag auf der Venus dauert sehr lange.",
+      "Ein Tag auf der Venus dauert 243 Erdentage.",
       "Die Venus wird oft Morgenstern oder Abendstern genannt."
+    ],
+quizfacts: [
+      "Dieser Planet ist der heißeste im Sonnensystem.",
+      "Ich bin fast so groß wie die Erde.",
+      "Dichte Wolken hüllen diesen Planeten ein.",
+      "Ein Tag auf mir dauert 243 Erdentage.",
+      "Dieser Planet wird oft Morgenstern oder Abendstern genannt."
     ],
     quizClues: [
       "Ich bin der heißeste Planet.",
@@ -53,6 +67,13 @@ const planetData = [
       "Die Erde hat einen Mond.",
       "Die Erde gehört zu den inneren Gesteinsplaneten."
     ],
+quizfacts: [
+      "Dieser Planet ist unser Heimatplanet.",
+      "Dieser Planet ist der einzige bekannte mit Leben.",
+      "Etwa 70 Prozent der Oberfläche sind mit Wasser bedeckt.",
+      "Ich habe nur einen Mond.",
+      "Ich gehöre zu den inneren Gesteinsplaneten."
+    ],
     quizClues: [
       "Auf mir leben Menschen, Tiere und Pflanzen.",
       "Ich bin unser Heimatplanet.",
@@ -69,13 +90,20 @@ const planetData = [
     facts: [
       "Der Mars wird auch der rote Planet genannt.",
       "Auf dem Mars gibt es riesige Vulkane.",
-      "Der Mars hat zwei kleine Monde.",
+      "Der Mars hat zwei kleine Monde, Phobos und Deimos.",
       "Der Mars ist kälter als die Erde.",
       "Viele Raumsonden haben den Mars bereits untersucht."
     ],
+quizfacts: [
+      "Dieser Planet wird auch der rote Planet genannt.",
+      "Auf diesem Planeten gibt es riesige Vulkane.",
+      "Ich habe zwei kleine Monde, Phobos und Deimos.",
+      "Auf mir ist es kälter als auf der Erde.",
+      "Viele Raumsonden haben diesen Planeten bereits untersucht."
+    ],
     quizClues: [
       "Man nennt mich den roten Planeten.",
-      "Ich habe zwei kleine Monde.",
+      "Ich habe zwei kleine Monde, Phobos und Deimos.",
       "Viele Raumsonden haben mich untersucht."
     ]
   },
@@ -93,10 +121,17 @@ const planetData = [
       "Jupiter hat viele Monde.",
       "Jupiter ist viel größer als die Erde."
     ],
+quizfacts: [
+      "Ich bin der größte Planet im Sonnensystem.",
+      "Dieser Planet ist ein Gasriese.",
+      "Auf diesen Planeten gibt es einen riesigen Sturm, den Großen Roten Fleck.",
+      "Ungefähr 95-101 Monde umkreisen mich",
+      "Über 1300 Erden würden in diesen Planeten passen."
+    ],
     quizClues: [
       "Ich bin der größte Planet.",
       "Auf mir gibt es den Großen Roten Fleck.",
-      "Ich bin ein großer Gasriese."
+      "Über 1300 Erden würden in diesen Planeten passen."
     ]
   },
   {
@@ -105,13 +140,20 @@ const planetData = [
     image: "bilder/saturn.png",
     order: 6,
     sizeRank: 7,
-    moons: 146,
+    moons: 274,
     facts: [
       "Saturn ist für seine schönen Ringe bekannt.",
       "Saturn ist ein großer Gasplanet.",
       "Die Ringe des Saturn bestehen aus Eis und Gestein.",
-      "Saturn hat viele Monde.",
+      "Saturn hat ungefähr 274 Monde.",
       "Saturn ist der zweitgrößte Planet im Sonnensystem."
+    ],
+quizfacts: [
+      "Ich bin für meine schönen Ringe bekannt.",
+      "Ich benötige über 29 Erdenjahre für einen Sonnenumlauf",
+      "Meine Ringe bestehen aus Eis und Gestein.",
+      "Einer meiner Monde besitzt eine dichte Atmosphäre",
+      "Dieser Planet ist der zweitgrößte im Sonnensystem."
     ],
     quizClues: [
       "Ich bin für meine großen Ringe bekannt.",
@@ -125,7 +167,7 @@ const planetData = [
     image: "bilder/uranus.png",
     order: 7,
     sizeRank: 6,
-    moons: 28,
+    moons: 27,
     facts: [
       "Uranus ist ein Eisriese.",
       "Uranus hat eine bläuliche Farbe.",
@@ -133,10 +175,17 @@ const planetData = [
       "Uranus ist sehr weit von der Sonne entfernt.",
       "Auch Uranus besitzt Ringe."
     ],
+quizfacts: [
+      "Ich bin ein Eisriese.",
+      "Dieser Planet hat eine bläuliche Farbe.",
+      "Dieser Planet dreht sich fast auf der Seite.",
+      "Auf mir herrschen Temperaturen von rund -224°C",
+      "Mein Durchmesser ist viermal so groß wie der Durchmesser der Erde "
+    ],
     quizClues: [
       "Ich drehe mich fast auf der Seite.",
-      "Ich bin ein bläulicher Eisriese.",
-      "Ich bin weit von der Sonne entfernt."
+      "Ich bin ein bläulicher Eisriese, mit dünnen Ringen.",
+      "Ich habe ungefähr 27 Monde und besitze dünne Ringe"
     ]
   },
   {
@@ -145,17 +194,24 @@ const planetData = [
     image: "bilder/neptun.png",
     order: 8,
     sizeRank: 5,
-    moons: 16,
+    moons: 14,
     facts: [
       "Neptun ist der äußerste Planet unseres Sonnensystems.",
-      "Neptun ist ein tiefblauer Eisriese.",
-      "Auf Neptun gibt es sehr starke Stürme.",
-      "Neptun ist sehr weit von der Sonne entfernt.",
-      "Ein Jahr auf Neptun dauert sehr, sehr lange."
+      "Einer meiner Monde umkreist mich entgegengesetzt der Rotation.",
+      "Ich brauche für einen Umlauf der Sonne, 165 Erdenjahre.",
+      "Dieser Planet ist am weitesten von der Sonne entfernt.",
+      "Ich habe ca. 14 Monde."
+    ],
+quizfacts: [
+      "Dieser Planet ist der äußerste Planet unseres Sonnensystems.",
+      "Einer meiner Monde umkreist mich entgegengesetzt der Rotation.",
+      "Ich brauche für einen Umlauf der Sonne, 165 Erdenjahre.",
+      "Dieser Planet ist am weitesten von der Sonne entfernt.",
+      "Ich habe ungefähr 14 Monde."
     ],
     quizClues: [
       "Ich bin der äußerste Planet.",
-      "Auf mir gibt es sehr starke Stürme.",
+      "Einer meiner Monde umkreist mich entgegengesetzt der Rotation.",
       "Ich bin ein tiefblauer Eisriese."
     ]
   }
