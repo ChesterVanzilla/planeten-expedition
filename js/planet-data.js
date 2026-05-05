@@ -240,10 +240,8 @@ const slotPositionsSize = [
 ];
 
 const memoryPhrases = [
-  "Mein Vater erklärt mir jeden Sonntag unseren Nachthimmel.",
-  "Meine Freunde entdecken morgens jeden Stern und Nebel.",
-  "Mein kleiner Esel mag jeden Sommer unsere Nachbarn.",
-  "Meine vier Enten mögen jeden Samstag unsere Nudeln."
+  "Mein Vater Erklärt Mir Jeden Sonntag Unseren Nachthimmel."   
+  
 ];
 
 const positiveMessages = [
