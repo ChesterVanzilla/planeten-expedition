@@ -30,6 +30,8 @@ body {
   max-width: 1880px;
   max-height: 1040px;
   position: relative;
+ transform: scale(0.85);
+  transform-origin: center center;
 }
 
 .screen {
