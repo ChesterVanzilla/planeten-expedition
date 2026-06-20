@@ -30,9 +30,8 @@ body {
   max-width: 1880px;
   max-height: 1040px;
   position: relative;
- transform: scale(1);
-  transform-origin: center center;
-}
+  zoom: 0.85;
+ }
 
 .screen {
   display: none;
