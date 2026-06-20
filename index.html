@@ -36,17 +36,17 @@
         <p class="mode-subtitle">Lerne unser Sonnensystem auf verschiedene Arten kennen.</p>
 
         <div class="mode-grid">
-          <button class="mode-card" onclick="location.href='modus-order.html'">
+          <button class="mode-card" onclick="location.href='modus-order.html?back=mode'">
             <div class="mode-card-title">Unser Sonnensystem</div>
             <p class="mode-card-text">Bringe die Planeten in die richtige Reihenfolge von der Sonne nach außen.</p>
           </button>
 
-          <button class="mode-card" onclick="location.href='modus-size.html'">
+          <button class="mode-card" onclick="location.href='modus-size.html?back=mode'">
             <div class="mode-card-title">Von kleinen und großen Planeten</div>
             <p class="mode-card-text">Sortiere die Planeten nach ihrer Größe – vom kleinsten bis zum größten.</p>
           </button>
 
-          <button class="mode-card" onclick="location.href='modus-quiz.html'">
+          <button class="mode-card" onclick="location.href='modus-quiz.html?back=mode'">
             <div class="mode-card-title">Quiz</div>
             <p class="mode-card-text">Wie gut kennst du dich schon im Sonnensystem aus - teste dein Wissen.</p>
           </button>
@@ -57,7 +57,7 @@
           </button>
         </div>
 
-        <button id="backToTitleBtn" class="main-btn">Zurück</button>
+        <button id="backButton" class="control-btn">Zurück</button>
       </div>
     </section>
   </div>
@@ -66,17 +66,25 @@
     const startScreen = document.querySelector(".title-screen");
     const modeScreen = document.getElementById("modeScreen");
     const toModeBtn = document.getElementById("toModeBtn");
-    const backToTitleBtn = document.getElementById("backToTitleBtn");
+    const backButton = document.getElementById("backButton");
 
     toModeBtn.addEventListener("click", () => {
       startScreen.style.display = "none";
       modeScreen.style.display = "flex";
     });
 
-    backToTitleBtn.addEventListener("click", () => {
+    backButton.addEventListener("click", () => {
       modeScreen.style.display = "none";
       startScreen.style.display = "flex";
     });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const requestedScreen = urlParams.get("screen");
+
+    if (requestedScreen === "mode") {
+      startScreen.style.display = "none";
+      modeScreen.style.display = "flex";
+    }
 
     document.addEventListener("gesturestart", e => e.preventDefault());
     document.addEventListener("dblclick", e => e.preventDefault(), { passive: false });
