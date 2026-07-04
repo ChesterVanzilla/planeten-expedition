@@ -9,14 +9,14 @@ const planetData = [
     facts: [
       "Merkur ist der sonnennächste Planet.",
       "Ein Jahr auf Merkur dauert nur 88 Erdentage.",
-      "Merkur ist der kleinsten Planeten im Sonnensystem.",
+      "Merkur ist der kleinste Planet im Sonnensystem.",
       "Merkur gehört zu den Gesteinsplaneten.",
       "Auf Merkur gibt es keine dichte Atmosphäre."
     ],
 quizfacts: [
       "Dieser Planet ist der sonnennächste Planet.",
       "Ein Jahr auf mir dauert nur 88 Erdentage.",
-      "Ich bin der kleinsten Planeten im Sonnensystem.",
+      "Ich bin der kleinste Planet im Sonnensystem.",
       "Die Oberfläche ähnelt der des Mondes.",
       "Ich habe weder Monde noch Ringe."
     ],
@@ -125,7 +125,7 @@ quizfacts: [
       "Ich bin der größte Planet im Sonnensystem.",
       "Dieser Planet ist ein Gasriese.",
       "Auf diesen Planeten gibt es einen riesigen Sturm, den Großen Roten Fleck.",
-      "Mehr als 100 Monde umkreisen mich",
+      "Etwas mehr als 100 Monde umkreisen mich",
       "Über 1300 Planeten mit Erdgröße würden in diesen Planeten passen."
     ],
     quizClues: [
